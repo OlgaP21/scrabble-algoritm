@@ -326,7 +326,20 @@ function checkMove(possibleWord, row, col) {
             }
         }
     }
-    if (word != '') return dictionary.find(word);
+    if (word != '' && !dictionary.find(word)) return false;
+    var word = '';
+    for (var j = 0; j < 15; j++) {
+        var boardLetter = board[row][j];
+        if (j >= col && j < col+possibleWord.length) boardLetter = possibleWord[j-col];
+        if (boardLetter == '0' && word.length == 1) {
+            word = '';
+        } else if (boardLetter == '0' && word.length > 1) {
+            if (!dictionary.find(word)) return false;
+            word = '';
+        } else if (boardLetter != '0') {
+            word += boardLetter;
+        }
+    }
     return true;
 }
 
