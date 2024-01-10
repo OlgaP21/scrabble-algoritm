@@ -120,6 +120,7 @@ var letters = [
     'b', 'f','š', 'z', 'ž'
 ];
 
+// https://en.wikipedia.org/wiki/Scrabble_letter_distributions
 var scores = {
     ' ': 0, 'a': 1, 'e': 1, 'i': 1, 's': 1, 't': 1, 'k': 1, 'l': 1, 'o': 1, 'u': 1,
     'd': 2, 'm': 2, 'n': 2, 'r': 2,
