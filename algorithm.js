@@ -1,4 +1,9 @@
 // dictionary
+/**
+ * https://albertauyeung.github.io/2020/06/15/python-trie.html/
+ * Node - kirjutatud ümber JavaScript keeles
+ * Trie - kirjutatud ümber JavaScript keeles; funktsioonid dfs ja query eemaldatud, funktsioon find lisatud
+ */
 class Node {
     constructor(letter) {
         this.letter = letter;
@@ -87,6 +92,7 @@ var multipliers = [
 var transposed = false;
 
 // rack
+// https://en.wikipedia.org/wiki/Scrabble_letter_distributions
 var letters = [
     ' ', ' ', 
     'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 
@@ -175,15 +181,22 @@ function updateState() {
         var letter = word[j-col];
         if (vertical) {
             if (multipliers[j][row] != '0') {
-                rack.splice(rack.indexOf(letter), 1);
+                if (letter == letter.toUpperCase()) {
+                    rack.splice(rack.indexOf(' '), 1);
+                } else {
+                    rack.splice(rack.indexOf(letter), 1);
+                }
             }
         } else {
             if (multipliers[row][j] != '0') {
-                rack.splice(rack.indexOf(letter), 1);
+                if (letter == letter.toUpperCase()) {
+                    rack.splice(rack.indexOf(' '), 1);
+                } else {
+                    rack.splice(rack.indexOf(letter), 1);
+                }
             }
         }
     }
-    console.log(rack.length);
     if (rack.length == 0) {
         bestMove[3] += 50;
     }
@@ -218,11 +231,21 @@ function updateBoard() {
     for (var j = col; j < col+word.length; j++) {
         var letter = word[j-col];
         if (vertical) {
-            board[j][row] = letter;
-            multipliers[j][row] = '0';
+            if (letter == letter.toUpperCase()) {
+                board[j][row] = letter.toLowerCase();
+                multipliers[j][row] = '-';
+            } else {
+                board[j][row] = letter;
+                multipliers[j][row] = '0';
+            }
         } else {
-            board[row][j] = letter;
-            multipliers[row][j] = '0';
+            if (letter == letter.toUpperCase()) {
+                board[row][j] = letter.toLowerCase();
+                multipliers[row][j] = '-';
+            } else {
+                board[row][j] = letter;
+                multipliers[row][j] = '0';
+            }
         }
     }
 }
@@ -250,6 +273,7 @@ function updateRack() {
 }
 
 //
+// funktsioon põhineb töös The World's Fastest Scrabble Program kirjeldatud algoritmil
 function leftPart(partialWord, node, anchor) {
     var [row, col, limit] = anchor;
     extendRight(partialWord, node, [row, col+1]);
@@ -260,10 +284,16 @@ function leftPart(partialWord, node, anchor) {
                 leftPart(partialWord+letter, node.children[letter], [row, col, limit-1]);
                 rack.push(letter);
             }
+            if (rack.includes(' ')) {
+                rack.splice(rack.indexOf(' '), 1);
+                leftPart(partialWord+letter.toUpperCase(), node.children[letter], [row, col, limit-1]);
+                rack.push(' ');
+            }
         }
     }
 }
 
+// funktsioon põhineb töös The World's Fastest Scrabble Program kirjeldatud algoritmil
 function extendRight(partialWord, node, square) {
     var [row, col] = square;
     if (board[row][col] == '0') {
@@ -275,6 +305,11 @@ function extendRight(partialWord, node, square) {
                 rack.splice(rack.indexOf(letter), 1);
                 extendRight(partialWord+letter, node.children[letter], [row, col+1]);
                 rack.push(letter);
+            }
+            if (rack.includes(' ')) {
+                rack.splice(rack.indexOf(' '), 1);
+                extendRight(partialWord+letter.toUpperCase(), node.children[letter], [row, col+1]);
+                rack.push(' ');
             }
         }
     } else {
@@ -375,8 +410,12 @@ function scoreWord(word, row, col) {
             wordMultiplier *= 2;
         } else if (squareMultiplier == '3w') {
             wordMultiplier *= 3;
+        } else if (squareMultiplier == '-') {
+            letterMultiplier = 0;
         }
-        score += scores[letter]*letterMultiplier;
+        if (letter != letter.toUpperCase()) {
+            score += scores[letter]*letterMultiplier;
+        }
     }
     score *= wordMultiplier;
     return score;
